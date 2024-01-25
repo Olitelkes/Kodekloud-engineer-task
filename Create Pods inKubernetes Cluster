@@ -1,0 +1,16 @@
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-nginx
+  labels:
+    app: nginx_app
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+      ports:
+        - name: web
+          containerPort: 80
+          protocol: TCP
+EOF
