@@ -1,0 +1,48 @@
+kubectl create namespace xfusion
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: time-config
+data:
+  TIME_FREQ: "3"
+
+---
+# PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: log-volume
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: time-check
+spec:
+  containers:
+  - name: time-check
+    image: busybox:latest
+    command: ["while", "true", ";", "do", "date", ">", "/opt/itadmin/time/time-check.log", ";", "sleep", "$TIME_FREQ", ";", "done"]
+    env:
+    - name: TIME_FREQ
+      valueFrom:
+        configMapKeyRef:
+          name: time-config
+          key: TIME_FREQ
+    volumeMounts:
+    - name: log-volume
+      mountPath: /opt/itadmin/time
+  volumes:
+  - name: log-volume
+    persistentVolumeClaim:
+      claimName: log-volume
